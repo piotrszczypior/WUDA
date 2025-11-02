@@ -1,0 +1,23 @@
+FROM python:3.13.9
+
+WORKDIR /app
+
+ENV POSTGRES_DB=test_db \
+    POSTGRES_USER=test_user \
+    POSTGRES_PASSWORD=test_pass \
+    POSTGRES_HOST=localhost \
+    JWT_KEY=test_jwt_key \
+    SECRET_KEY=test_secret_key \
+    APP_PORT=8000
+
+COPY requirements.txt requirements_test.txt ./
+
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -r requirements_test.txt
+
+COPY . .
+
+RUN useradd -m tester
+USER tester
+
+ENTRYPOINT ["pytest"]
