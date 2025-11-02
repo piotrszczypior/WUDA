@@ -129,6 +129,8 @@ def add_game_req(new_game: dict):
     )
     response.raise_for_status()
     return True
+
+
 def get_games_req(game_id=None):
     if game_id:
         part=f"/games/{game_id}"

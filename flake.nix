@@ -13,6 +13,7 @@
       buildInputs = [
         pkgs.act
         pkgs.docker
+        pkgs.docker-compose 
       ];
     };
   };
