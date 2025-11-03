@@ -4,9 +4,19 @@ on:
   push:
     paths:
       - 'back-end/**'
+      - '.github/workflows/back-end.yml'
   pull_request:
     paths:
       - 'back-end/**'
+      - '.github/workflows/back-end.yml'
+
+  workflow_dispatch:
+    inputs:
+      skip_push:
+        description: 'Skip push to registry'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   lint:
@@ -61,7 +71,8 @@ jobs:
     name: Build and push to registry
     runs-on: ubuntu-latest
     needs: [lint, security, tests]
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/master' && github.event_name == 'push') ||
+        (github.event_name == 'workflow_dispatch' && !inputs.skip_push)
     
     steps:
       - name: Checkout 
