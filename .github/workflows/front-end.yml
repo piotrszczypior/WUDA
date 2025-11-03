@@ -79,7 +79,7 @@
           id: meta
           uses: docker/metadata-action@v5
           with:
-            images: ghcr.io/${{ github.repository }}
+            images: ghcr.io/${{ github.repository }}/frontend
             tags: |
               type=ref,event=branch
               type=sha
