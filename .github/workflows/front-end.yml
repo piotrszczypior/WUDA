@@ -38,7 +38,7 @@
         - name: Build image for security check
           run: docker build -f front-end/Dockerfile.security -t frontend-security front-end/
 
-        - mame: Run security check
+        - name: Run security check
           run: docker run --rm frontend-security:latest 
 
 
