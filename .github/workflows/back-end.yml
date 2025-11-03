@@ -1,3 +1,5 @@
+name: Backend CI/CD
+
 on:
   push:
     paths:
@@ -7,11 +9,62 @@ on:
       - 'back-end/**'
 
 jobs:
-  build-and-push:
+  lint:
+    name: Code Linting
     runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image for linting 
+        run: docker build -f back-end/Dockerfile.lint -t backend-lint back-end/
+        
+      - name: Lint code
+        run: docker run --rm backend-lint:latest
+
+  # TODO: fix security issues in code
+  security:
+    name: Security scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # - name: Build image for security check
+      #   run: docker build -f back-end/Dockerfile.security -t backend-security back-end/
+
+      # - name: Run security check
+      #   run: docker run --rm backend-security:latest 
+
+
+  tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build image for testing
+        run: docker build -f back-end/Dockerfile.test -t backend-tests back-end/
+
+      - name: Run tests
+        run: docker run --rm backend-tests:latest 
+
+
+  build-and-push:
+    name: Build and push to registry
+    runs-on: ubuntu-latest
+    needs: [lint, security, tests]
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     
     steps:
-      - name: Checkout
+      - name: Checkout 
         uses: actions/checkout@v4
 
       - name: Log in to GHCR
@@ -32,24 +85,12 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-          
-      - name: Build image for testing
-        uses: docker/build-push-action@v6
-        with:
-          context: ./back-end
-          file: ./back-end/Dockerfile.test
-          load: true
-          tags: test-image:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Run tests inside built image
-        run: docker run --rm test-image:latest --maxfail=1 -n auto
         
-      - name: Build and push final image
+      - name: Build and push image 
         uses: docker/build-push-action@v6
         with:
           context: ./back-end
+          file: ./back-end/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
