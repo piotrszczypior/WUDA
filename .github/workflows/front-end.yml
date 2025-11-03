@@ -4,9 +4,18 @@
     push:
       paths:
         - 'front-end/**'
+        - '.github/workflows/front-end.yml'
       pull_request:
         - 'front-end/**'
-
+        - '.github/workflows/front-end.yml'
+  
+    workflow_dispatch:
+      inputs:
+        skip_push:
+          description: 'Skip push to registry'
+          required: false
+          type: boolean
+          default: false
 
   jobs:
     lint:
