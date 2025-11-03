@@ -28,12 +28,12 @@
 
     # TODO: fix security issues in code
     security:
-    #   name: Security scan
-    #   runs-on: ubuntu-latest
+      name: Security scan
+      runs-on: ubuntu-latest
 
-    #   steps:
-    #     - name: Checkout code
-    #       uses: actions/checkout@v4
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
 
     #     - name: Build image for security check
     #       run: docker build -f front-end/Dockerfile.security -t frontend-security front-end/
