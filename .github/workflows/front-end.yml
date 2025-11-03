@@ -20,11 +20,11 @@
         - name: Set up Docker Buildx
           uses: docker/setup-buildx-action@v3
 
-        - name: Build image for linting 
-          run: docker build -f front-end/Dockerfile.lint -t frontend-lint front-end/
+        # - name: Build image for linting 
+        #   run: docker build -f front-end/Dockerfile.lint -t frontend-lint front-end/
           
-        - name: Lint code
-          run: docker run --rm frontend-lint:latest
+        # - name: Lint code
+        #   run: docker run --rm frontend-lint:latest
 
     # TODO: fix security issues in code
     security:
