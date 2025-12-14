@@ -1,0 +1,27 @@
+{{- if and .Values.postgres.enabled .Values.postgres.persistence.enabled }}
+{{- $rawName := default .Chart.Name .Values.nameOverride -}}
+{{- $chartName := $rawName | trunc 63 | trimSuffix "-" -}}
+{{- $releaseBase := ternary .Release.Name (printf "%s-%s" .Release.Name $rawName) (contains $rawName .Release.Name) -}}
+{{- $fullName := default $releaseBase .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- $postgresName := printf "%s-postgres" $fullName | trunc 63 | trimSuffix "-" -}}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $postgresName }}
+  labels:
+    helm.sh/chart: {{ $chartLabel }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ $chartName }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: postgres
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.postgres.persistence.size }}
+  {{- if .Values.postgres.persistence.storageClassName }}
+  storageClassName: {{ .Values.postgres.persistence.storageClassName }}
+  {{- end }}
+{{- end }}

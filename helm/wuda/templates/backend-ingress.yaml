@@ -1,0 +1,45 @@
+{{- if .Values.backend.ingress.enabled }}
+{{- $rawName := default .Chart.Name .Values.nameOverride -}}
+{{- $chartName := $rawName | trunc 63 | trimSuffix "-" -}}
+{{- $releaseBase := ternary .Release.Name (printf "%s-%s" .Release.Name $rawName) (contains $rawName .Release.Name) -}}
+{{- $fullName := default $releaseBase .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- $backendName := printf "%s-backend" $fullName | trunc 63 | trimSuffix "-" -}}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $backendName }}
+  labels:
+    helm.sh/chart: {{ $chartLabel }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ $chartName }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: backend
+  {{- with .Values.backend.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.backend.ingress.className }}
+  ingressClassName: {{ .Values.backend.ingress.className }}
+  {{- end }}
+  rules:
+    {{- range .Values.backend.ingress.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ $backendName }}
+                port:
+                  number: {{ $.Values.backend.service.port }}
+          {{- end }}
+    {{- end }}
+  {{- with .Values.backend.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

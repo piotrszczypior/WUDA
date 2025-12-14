@@ -1,0 +1,21 @@
+{{- if .Values.postgres.enabled }}
+{{- $rawName := default .Chart.Name .Values.nameOverride -}}
+{{- $chartName := $rawName | trunc 63 | trimSuffix "-" -}}
+{{- $releaseBase := ternary .Release.Name (printf "%s-%s" .Release.Name $rawName) (contains $rawName .Release.Name) -}}
+{{- $fullName := default $releaseBase .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- $postgresName := printf "%s-postgres" $fullName | trunc 63 | trimSuffix "-" -}}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $postgresName }}-config
+  labels:
+    helm.sh/chart: {{ $chartLabel }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ $chartName }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: postgres
+data:
+  POSTGRES_DB: {{ .Values.postgres.config.POSTGRES_DB | quote }}
+  POSTGRES_USER: {{ .Values.postgres.config.POSTGRES_USER | quote }}
+{{- end }}

@@ -1,0 +1,22 @@
+{{- $rawName := default .Chart.Name .Values.nameOverride -}}
+{{- $chartName := $rawName | trunc 63 | trimSuffix "-" -}}
+{{- $releaseBase := ternary .Release.Name (printf "%s-%s" .Release.Name $rawName) (contains $rawName .Release.Name) -}}
+{{- $fullName := default $releaseBase .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- $frontendName := printf "%s-frontend" $fullName | trunc 63 | trimSuffix "-" -}}
+{{- $backendName := printf "%s-backend" $fullName | trunc 63 | trimSuffix "-" -}}
+{{- $chartLabel := printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $frontendName }}-config
+  labels:
+    helm.sh/chart: {{ $chartLabel }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ $chartName }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: frontend
+data:
+  BACKEND_HOSTNAME: {{ default $backendName .Values.frontend.config.BACKEND_HOSTNAME | quote }}
+  BACKEND_PORT: {{ .Values.frontend.config.BACKEND_PORT | quote }}
+  APP_PORT: {{ .Values.frontend.config.APP_PORT | quote }}
+  APP_HOST: {{ .Values.frontend.config.APP_HOST | quote }}

@@ -1,0 +1,62 @@
+global:
+  imagePullSecrets: []
+
+frontend:
+  replicaCount: 1
+  image:
+    repository: wuda-frontend
+    tag: local
+  config:
+    BACKEND_HOSTNAME: wuda-backend
+    BACKEND_PORT: "5000"
+    APP_PORT: "8000"
+    APP_HOST: "0.0.0.0"
+  secrets:
+    SECRET_KEY: secretkey
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: frontend.local
+        paths:
+          - path: /
+            pathType: Prefix
+
+backend:
+  replicaCount: 1
+  image:
+    repository: wuda-backend
+    tag: local
+  config:
+    POSTGRES_DB: wuda
+    POSTGRES_USER: wuda
+    POSTGRES_HOST: wuda-postgres
+    PORT: "5432"
+    APP_PORT: "5000"
+    APP_HOST: "0.0.0.0"
+  secrets:
+    POSTGRES_PASSWORD: postgrespassword
+    JWT_KEY: jwtkey
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: backend.local
+        paths:
+          - path: /
+            pathType: Prefix
+
+postgres:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "16"
+  config:
+    POSTGRES_DB: wuda
+    POSTGRES_USER: wuda
+  secrets:
+    POSTGRES_PASSWORD: postgrespassword
+  persistence:
+    enabled: false
+    size: 1Gi
+    storageClassName: ""
