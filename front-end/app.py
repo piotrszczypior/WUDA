@@ -24,6 +24,10 @@ def inject_user_info():
         return dict(curr_user=session['login'])
     return dict(curr_user=None)
 
+@app.route("/healthz")
+def healthz():
+    return {"status": "ok"}, 200
+
 @app.errorhandler(500)
 def internal_server_error(e):
     logger.exception("Internal server error: %s", e)
