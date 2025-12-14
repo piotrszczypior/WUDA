@@ -13,6 +13,11 @@
       buildInputs = [
         pkgs.act
         pkgs.docker
+        pkgs.kubectl
+        pkgs.kubernetes-helm
+        pkgs.kind
+        pkgs.k3d
+        pkgs.nerdctl
       ];
     };
   };
